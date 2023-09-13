@@ -8,10 +8,16 @@ import { TutorialService } from 'src/app/services/tutorial.service';
   styleUrls: ['./tutorial-list.component.css']
 })
 export class TutorialListComponent implements OnInit {
-  tutorials?: Tutorial[] = [];
+
+  tutorials?: any = [];
   currentTutorial: Tutorial = {};
   currentIndex = -1;
   title = "";
+
+  page = 1;
+  count = 0;
+  pageSize = 3;
+  pageSizes = [3, 6, 9]
 
   constructor(private tutorialService: TutorialService) { }
 
@@ -19,11 +25,31 @@ export class TutorialListComponent implements OnInit {
     this.retrieveTutorials();
   }
 
+  getRequestParams(searchTitle: string, page: number, pageSize: number): any {
+    let params: any = {}
+    if (searchTitle) {
+      params[`title`] = searchTitle;
+    }
+
+    if (page) {
+      params[`page`] = page - 1;
+    }
+
+    if (pageSize) {
+      params[`size`] = pageSize;
+    }
+
+    return params;
+  }
+
   retrieveTutorials(): void {
-    this.tutorialService.getAll().subscribe({
-      next: (data) => {
-        this.tutorials = data;
-        console.log(this.tutorials)
+    const params = this.getRequestParams(this.title, this.page, this.pageSize);
+
+    this.tutorialService.getAll(params).subscribe({
+      next: (response) => {
+        const { tutorials, totalItems } = response;
+        this.tutorials = tutorials;
+        this.count = totalItems;
       },
       error: (e) => console.log(e)
     })
@@ -52,17 +78,31 @@ export class TutorialListComponent implements OnInit {
   }
 
   searchTitle(): void {
-    this.currentTutorial = {};
-    this.currentIndex = -1;
+    // this.currentTutorial = {};
+    // this.currentIndex = -1;
 
-    this.tutorialService.findByTitle(this.title)
-      .subscribe({
-        next: (data) => {
-          this.tutorials = data;
-          console.log(data);
-        },
-        error: (e) => console.error(e)
-      });
+    this.page = 1;
+    this.retrieveTutorials()
+
+    // this.tutorialService.findByTitle(this.title)
+    //   .subscribe({
+    //     next: (data) => {
+    //       this.tutorials = data;
+    //       console.log(data);
+    //     },
+    //     error: (e) => console.error(e)
+    //   });
+  }
+
+
+  handlePageChange(event: number): void {
+    this.page = event;
+    this.retrieveTutorials()
+  }
+  handlePageSizeChange(event: any) {
+    this.pageSize = event.target.value;
+    this.page = 1;
+    this.retrieveTutorials();
   }
 
 
