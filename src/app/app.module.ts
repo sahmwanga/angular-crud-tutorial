@@ -38,7 +38,7 @@ import { httpInterceptorProviders } from 'src/helpers/http.interceptor';
     NgxPaginationModule
   ],
   providers: [
-    httpInterceptorProviders
+    // httpInterceptorProviders
   ],
   bootstrap: [AppComponent]
 })
